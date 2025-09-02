@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pterodactyl Panel Management - Login & Register</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+  <style>
+    /* Theme: Neon red-blue on dark cyberpunk */
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: 'Inter', sans-serif;
+      min-height:100vh;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+      color:#eee;
+      overflow:hidden;
+      position:relative;
+    }
+    body::before {
+      content:'';
+      position:absolute; top:0; left:0; width:100%; height:100%;
+      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><radialGradient id="a" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="rgba(0,255,255,0.2)"/><stop offset="100%" stop-color="rgba(0,0,255,0)"/></radialGradient></defs><circle cx="20" cy="20" r="2" fill="url(%23a)"><animate attributeName="cy" values="20;80;20" dur="3s" repeatCount="indefinite"/></circle><circle cx="80" cy="80" r="3" fill="url(%23a)"><animate attributeName="cx" values="80;20;80" dur="4s" repeatCount="indefinite"/></circle><circle cx="40" cy="60" r="1" fill="url(%23a)"><animate attributeName="r" values="1;4;1" dur="2s" repeatCount="indefinite"/></circle></svg>') no-repeat center/cover;
+      opacity:0.15;
+      animation: float 25s ease-in-out infinite;
+      z-index:0;
+    }
+    @keyframes float {
+      0%,100% {transform:translateY(0) rotate(0deg);}
+      50% {transform:translateY(-25px) rotate(180deg);}
+    }
+    .container {
+      position:relative; z-index:1;
+      background:rgba(10,10,30,0.85);
+      backdrop-filter:blur(10px);
+      padding:2.5rem 3rem;
+      border-radius:24px;
+      width:100%; max-width:420px;
+      box-shadow: 0 0 20px #00ffffaa, inset 0 0 15px #0000ff88;
+      animation: slideIn 0.8s cubic-bezier(0.25,0.46,0.45,0.94);
+    }
+    @keyframes slideIn {
+      from {opacity:0; transform:translateY(30px);}
+      to {opacity:1; transform:translateY(0);}
+    }
+    .logo {text-align:center; margin-bottom:1.5rem;}
+    .logo i {
+      font-size:4rem;
+      background:linear-gradient(135deg, #00f, #f00);
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;
+      background-clip:text;
+    }
+    h1 {
+      text-align:center; font-weight:700; font-size:2rem; margin-bottom:0.5rem;
+      background:linear-gradient(135deg, #00f, #f00);
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;
+      background-clip:text;
+    }
+    .subtitle {text-align:center; margin-bottom:2rem; color:#bbb; font-size:1rem;}
+    .form-group {margin-bottom:1.5rem; position:relative;}
+    label {
+      display:block; margin-bottom:0.5rem; font-weight:600;
+      text-transform:uppercase; font-size:0.85rem; letter-spacing:0.7px; color:#ccc;
+    }
+    .input-wrapper {position:relative;}
+    .input-wrapper i {
+      position:absolute; left:1rem; top:50%; transform:translateY(-50%);
+      font-size:1.2rem; color:#00ffffcc; pointer-events:none;
+    }
+    input {
+      width:100%; padding:1rem 1rem 1rem 3rem; border-radius:12px;
+      border:2px solid #003366; background:rgba(0,0,0,0.6); color:#0ff; font-size:1rem; font-family:inherit;
+      transition:all 0.3s ease; box-shadow:inset 0 0 8px #00f0ff88;
+    }
+    input::placeholder {color:#007777aa;}
+    input:focus {
+      outline:none; border-color:#f00;
+      box-shadow:0 0 8px #ff0000cc, inset 0 0 10px #ff0055cc;
+      background:rgba(20,0,0,0.8); color:#f88;
+    }
+    button {
+      width:100%; padding:1rem; border-radius:12px; border:none;
+      font-weight:700; font-size:1.1rem; letter-spacing:1.2px;
+      text-transform:uppercase; cursor:pointer;
+      position:relative; overflow:hidden;
+      color:#fff; background:linear-gradient(135deg, #00f 0%, #f00 100%);
+      box-shadow:0 0 15px #00ffffcc; transition:all 0.3s ease;
+    }
+    button:before {
+      content:''; position:absolute; top:0; left:-100%;
+      width:100%; height:100%; background:linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
+      transition:left 0.5s ease; z-index:1;
+    }
+    button:hover:before {left:100%;}
+    button:hover {box-shadow:0 0 25px #ff00ffcc, 0 0 40px #00ffffcc; transform:translateY(-3px);}
+    button:active {transform:translateY(0); box-shadow:0 0 15px #ff00ffaa;}
+    button:disabled {background:#444; cursor:not-allowed; box-shadow:none;}
+    .error, .success {
+      padding:1rem; border-radius:12px; margin-bottom:1.5rem;
+      text-align:center; font-weight:600; animation:shake 0.5s ease-in-out;
+    }
+    .error {background:linear-gradient(135deg, #ff4c4c, #ff0000); border:1px solid #ff6666; color:#fff; box-shadow:0 0 10px #ff0000cc;}
+    .success {background:linear-gradient(135deg, #00ff88, #009944); border:1px solid #00cc55; color:#004400; box-shadow:0 0 10px #00ff88cc;}
+    @keyframes shake {0%,100% {transform:translateX(0);}25%{transform:translateX(-6px);}75%{transform:translateX(6px);}}
+    .hidden {display:none!important;}
+    .toggle-link {margin-top:1rem; text-align:center; color:#00ffffcc; cursor:pointer; font-size:0.9rem; user-select:none;}
+    .toggle-link:hover {color:#ff0088cc;}
+    @media(max-width:480px){
+      .container{margin:1rem; padding:2rem;}
+      h1{font-size:1.5rem;}
+      .logo i{font-size:3rem;}
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="logo"><i class="fas fa-rocket"></i></div>
+    <h1 id="formTitle">Panel Management</h1>
+    <p class="subtitle" id="formSubtitle">Access your Pterodactyl control center</p>
+
+    <div id="message" class="hidden"></div>
+
+    <!-- LOGIN FORM -->
+    <form id="loginForm">
+      <div class="form-group">
+        <label>Username</label>
+        <div class="input-wrapper">
+          <input type="text" id="loginUsername" required autocomplete="username"/>
+          <i class="fas fa-user"></i>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <div class="input-wrapper">
+          <input type="password" id="loginPassword" required autocomplete="current-password"/>
+          <i class="fas fa-lock"></i>
+        </div>
+      </div>
+      <button type="submit" id="loginBtn"><span id="loginBtnText">Login</span></button>
+      <div class="toggle-link" id="showRegister">Don't have an account? Register</div>
+    </form>
+
+    <!-- REGISTER FORM -->
+    <form id="registerForm" class="hidden" autocomplete="off">
+      <div class="form-group">
+        <label>Username</label>
+        <div class="input-wrapper">
+          <input type="text" id="regUsername" required autocomplete="off"/>
+          <i class="fas fa-user"></i>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <div class="input-wrapper">
+          <input type="password" id="regPassword" required autocomplete="new-password"/>
+          <i class="fas fa-lock"></i>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Access Code</label>
+        <div class="input-wrapper">
+          <input type="password" id="accessCode" required autocomplete="off"/>
+          <i class="fas fa-key"></i>
+        </div>
+      </div>
+      <button type="submit" id="registerBtn"><span id="registerBtnText">Register</span></button>
+      <div class="toggle-link" id="showLogin">Already have an account? Login</div>
+    </form>
+  </div>
+
+<script>
+const BIN_ID = '68ae974c43b1c97be92c8247';
+const API_KEY = '$2a$10$Snb9DYh/Dysy/Rv9SCufe.9sx5lcbrctM3CbB2NK6zK/n6liGE5Uq';
+const API_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
+const ACCESS_CODE_REQUIRED = 'NEON123';
+
+const loginForm = document.getElementById('loginForm');
+const registerForm = document.getElementById('registerForm');
+const messageBox = document.getElementById('message');
+const showRegisterLink = document.getElementById('showRegister');
+const showLoginLink = document.getElementById('showLogin');
+const formTitle = document.getElementById('formTitle');
+const formSubtitle = document.getElementById('formSubtitle');
+const loginBtnText = document.getElementById('loginBtnText');
+const registerBtnText = document.getElementById('registerBtnText');
+
+showRegisterLink.addEventListener('click', () => toggleForms('register'));
+showLoginLink.addEventListener('click', () => toggleForms('login'));
+
+function toggleForms(target) {
+  messageBox.className = 'hidden';
+  messageBox.textContent = '';
+  if (target === 'register') {
+    loginForm.classList.add('hidden');
+    registerForm.classList.remove('hidden');
+    formTitle.textContent = 'Register Panel';
+    formSubtitle.textContent = 'Create your account with access code';
+  } else {
+    registerForm.classList.add('hidden');
+    loginForm.classList.remove('hidden');
+    formTitle.textContent = 'Panel Management';
+    formSubtitle.textContent = 'Access your Pterodactyl control center';
+  }
+}
+
+async function getUsers() {
+  try {
+    const res = await fetch(`${API_URL}/latest`, {
+      headers: { 'X-Master-Key': API_KEY }
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status} - ${res.statusText}`);
+    const json = await res.json();
+    return json.record?.users || [];
+  } catch (e) {
+    console.error(e);
+    showMessage('Failed to load user data. ' + e.message, 'error');
+    return null;
+  }
+}
+
+async function saveUsers(users) {
+  try {
+    const res = await fetch(API_URL, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Master-Key': API_KEY,
+        'X-Bin-Versioning': 'false'
+      },
+      body: JSON.stringify({ users })
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status} - ${res.statusText}`);
+    return true;
+  } catch (e) {
+    console.error(e);
+    return false;
+  }
+}
+
+function showMessage(msg, type) {
+  messageBox.textContent = msg;
+  messageBox.className = type === 'success' ? 'success' : 'error';
+}
+
+loginForm.addEventListener('submit', async e => {
+  e.preventDefault();
+  showMessage('', '');
+  loginBtnText.textContent = 'Checking...';
+
+  const username = document.getElementById('loginUsername').value.trim();
+  const password = document.getElementById('loginPassword').value;
+
+  const users = await getUsers();
+  loginBtnText.textContent = 'Login';
+  if (!users) return;
+
+  const found = users.find(u => u.username === username && u.password === password);
+
+  if (found) {
+    showMessage(`Welcome, ${found.username}!`, 'success');
+    setTimeout(() => window.location.href = 'dashboard.html', 1000);
+  } else {
+    showMessage('Invalid username or password', 'error');
+  }
+});
+
+
+registerForm.addEventListener('submit', async e => {
+  e.preventDefault();
+  showMessage('', '');
+  registerBtnText.textContent = 'Registering...';
+
+  const username = registerForm.regUsername.value.trim();
+  const password = registerForm.regPassword.value;
+  const code = registerForm.accessCode.value.trim();
+  registerBtnText.textContent = 'Register';
+
+  if (!username || !password || !code) {
+    showMessage('Please fill all fields', 'error');
+    return;
+  }
+  if (code !== ACCESS_CODE_REQUIRED) {
+    showMessage('Invalid access code', 'error');
+    return;
+  }
+
+  const users = await getUsers();
+  if (!users) return;
+
+  if (users.find(u => u.username === username)) {
+    showMessage('Username already exists', 'error');
+    return;
+  }
+
+  users.push({ username, password });
+  const ok = await saveUsers(users);
+  if (ok) {
+    showMessage('Registration successful! Please login.', 'success');
+    registerForm.reset();
+    setTimeout(() => toggleForms('login'), 1500);
+  } else {
+    showMessage('Failed to save. Try again.', 'error');
+  }
+});
+</script>
+
+</body>
+</html>
++
